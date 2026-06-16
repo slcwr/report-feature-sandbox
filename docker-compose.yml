@@ -1,0 +1,40 @@
+services:
+  # ───────────────────────────────
+  # api: Hono + DuckDB（レポートAPI / Lambda想定）
+  # ───────────────────────────────
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    volumes:
+      - ./api:/workspace/api
+      # レポート元データ(data/)を api から読めるようにマウント
+      - ./data:/workspace/data
+    working_dir: /workspace/api
+    ports:
+      - "8787:8787"
+    environment:
+      - NODE_ENV=development
+      # data フォルダの場所を環境変数で渡す
+      - DATA_DIR=/workspace/data
+    command: sleep infinity
+
+  # ───────────────────────────────
+  # web: React Router v7（Remix）フロント / 開発拠点
+  # ───────────────────────────────
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace
+    working_dir: /workspace/web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      # loader/action から api を呼ぶときのURL（サービス名で名前解決）
+      - API_URL=http://api:8787
+    command: sleep infinity
+    depends_on:
+      - api

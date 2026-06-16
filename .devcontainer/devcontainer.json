@@ -1,10 +1,30 @@
 {
-  "name": "report-lab (DuckDB + TS)",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
-  "postCreateCommand": "npm install",
+  "name": "report-feature-sandbox (Remix + Hono/DuckDB)",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "web",
+  "workspaceFolder": "/workspace",
+
+  "forwardPorts": [3000, 8787],
+  "portsAttributes": {
+    "3000": { "label": "Remix (web)", "onAutoForward": "notify" },
+    "8787": { "label": "Report API (api)", "onAutoForward": "silent" }
+  },
+
+  "postCreateCommand": "echo 'コンテナ準備完了。api/ で npm install、web/ は setup-web.sh で生成してください'",
+
   "customizations": {
     "vscode": {
-      "extensions": ["biomejs.biome", "mtxr.sqltools"]
+      "extensions": [
+        "biomejs.biome",
+        "ms-azuretools.vscode-docker",
+        "mtxr.sqltools"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "biomejs.biome"
+      }
     }
-  }
+  },
+
+  "remoteUser": "node"
 }
