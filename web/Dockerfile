@@ -1,14 +1,22 @@
-# React Router v7（Remix）フロント / 開発拠点
-FROM node:22-bookworm-slim
+FROM node:20-alpine AS development-dependencies-env
+COPY . /app
+WORKDIR /app
+RUN npm ci
 
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends git curl ca-certificates sudo \
-  && rm -rf /var/lib/apt/lists/* \
-  && echo "node ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/node
+FROM node:20-alpine AS production-dependencies-env
+COPY ./package.json package-lock.json /app/
+WORKDIR /app
+RUN npm ci --omit=dev
 
-RUN mkdir -p /workspace/web \
-  && chown -R node:node /workspace
+FROM node:20-alpine AS build-env
+COPY . /app/
+COPY --from=development-dependencies-env /app/node_modules /app/node_modules
+WORKDIR /app
+RUN npm run build
 
-WORKDIR /workspace/web
-USER node
-EXPOSE 3000
+FROM node:20-alpine
+COPY ./package.json package-lock.json /app/
+COPY --from=production-dependencies-env /app/node_modules /app/node_modules
+COPY --from=build-env /app/build /app/build
+WORKDIR /app
+CMD ["npm", "run", "start"]
