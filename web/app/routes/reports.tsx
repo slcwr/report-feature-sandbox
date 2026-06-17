@@ -1,12 +1,12 @@
 // ─────────────────────────────────────────────
 // レポート表示ルートのサンプル
-// web 生成後、このファイルを web/app/routes/reports.tsx として置く。
-// （routes.ts に route("reports", "routes/reports.tsx") の登録も必要）
-//
-// 前の会話で話した「loaderでサーバーからデータを取り、画面に出す」の実物。
 // loader が api(Hono) を呼び、その結果を画面に表示する。
 // ─────────────────────────────────────────────
 import type { Route } from "./+types/reports";
+import { hc } from "hono/client";
+// api 側がエクスポートしている型だけを import（型なので実行時には消える）。
+// これにより client.api.reports[...] が型安全になり、URL の打ち間違いも防げる。
+import type { AppType } from "../../../api/src/index";
 
 // loader：サーバー側で実行され、api からレポートデータを取得する
 export async function loader() {
@@ -14,7 +14,10 @@ export async function loader() {
   // docker のサービス名 api を使う（環境変数 API_URL で渡している）
   const apiUrl = process.env.API_URL ?? "http://127.0.0.1:8787";
 
-  const res = await fetch(`${apiUrl}/api/reports/completion-by-school`);
+  // Hono RPC クライアント。fetch の代わりにメソッド呼び出しで api を叩く。
+  const client = hc<AppType>(apiUrl);
+
+  const res = await client.api.reports["completion-by-school"].$get();
   const completionBySchool = await res.json();
 
   return { completionBySchool };
