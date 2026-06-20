@@ -1,8 +1,9 @@
 import { DuckDBInstance } from "@duckdb/node-api";
 
 // ─────────────────────────────────────────────
-// DB（DuckDB）まわり
-// data/watch_logs.csv を DuckDB で集計する。
+// インフラ層：DB（DuckDB）接続
+// 「SQL をどう実行するか」だけを担当する。
+// 「どんな SQL を投げるか」は repositories 層の責務。
 // ─────────────────────────────────────────────
 
 // データ置き場（docker では DATA_DIR を渡す。未指定ならローカルの ../data）

@@ -1,0 +1,33 @@
+{
+  // web サービス用の devcontainer。
+  // VS Code でこの構成を開くと web コンテナ（React Router / Vite）の中に入る。
+  // api は api 用の devcontainer（../api/devcontainer.json）を別ウィンドウで開く。
+  "name": "report-sandbox / web (React Router)",
+  "dockerComposeFile": "../../docker-compose.yml",
+  "service": "web",
+  // リポジトリ全体はマウントされているが、編集の起点は web/ に絞る
+  "workspaceFolder": "/workspace/web",
+
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": { "label": "Remix (web)", "onAutoForward": "notify" }
+  },
+
+  "postCreateCommand": "echo 'web コンテナ準備完了。依存が未インストールなら npm install、起動は npm run dev'",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "biomejs.biome",
+        "ms-azuretools.vscode-docker",
+        "mtxr.sqltools"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "biomejs.biome"
+      }
+    }
+  },
+
+  "remoteUser": "node"
+}

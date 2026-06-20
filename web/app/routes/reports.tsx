@@ -12,22 +12,26 @@ import type { AppType } from "../../../api/src/index";
 export async function loader() {
   // サーバー間通信なので、ブラウザ用の localhost ではなく
   // docker のサービス名 api を使う（環境変数 API_URL で渡している）
-  const apiUrl = process.env.API_URL ?? "http://127.0.0.1:8787";
+  const apiUrl = process.env.API_URL ?? "http://localhost:8787";
 
   // Hono RPC クライアント。fetch の代わりにメソッド呼び出しで api を叩く。
   const client = hc<AppType>(apiUrl);
 
-  const res = await client.api.reports["completion-by-school"].$get();
-  const completionBySchool = await res.json();
+  const completionBySchoolres = await client.api.reports["completion-by-school"].$get();
+  const completionBySchool = await completionBySchoolres.json();
 
-  return { completionBySchool };
+  const videoRankingres = await client.api.reports["video-ranking"].$get();
+  const videoRanking = await videoRankingres.json();
+
+  return { completionBySchool, videoRanking };
 }
 
 // 画面：loader が取ったデータを props 経由で受け取って表示
 export default function Reports({ loaderData }: Route.ComponentProps) {
-  const { completionBySchool } = loaderData;
+  const { completionBySchool, videoRanking } = loaderData;
 
   return (
+    <>
     <div style={{ fontFamily: "system-ui", maxWidth: 640, margin: "40px auto" }}>
       <h1>学校別 完了率レポート</h1>
       <table style={{ borderCollapse: "collapse", width: "100%" }}>
@@ -49,6 +53,28 @@ export default function Reports({ loaderData }: Route.ComponentProps) {
         </tbody>
       </table>
     </div>
+    <div style={{ fontFamily: "system-ui", maxWidth: 640, margin: "40px auto" }}>
+      <h1>動画ランキング</h1>
+      <table style={{ borderCollapse: "collapse", width: "100%" }}>
+        <thead>
+          <tr>
+            <th style={th}>動画タイトル</th>
+            <th style={th}>視聴数</th>
+            <th style={th}>進捗率(%)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {videoRanking.map((row: any) => (
+            <tr key={row.school_id}>
+              <td style={td}>{row.video_title}</td>
+              <td style={td}>{row.views}</td>
+              <td style={td}>{row.avg_progress}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    </>
   );
 }
 

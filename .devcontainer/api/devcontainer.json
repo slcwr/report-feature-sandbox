@@ -1,0 +1,33 @@
+{
+  // api サービス用の devcontainer。
+  // VS Code でこの構成を開くと api コンテナ（Hono/DuckDB）の中に入る。
+  // web は web 用の devcontainer（../web/devcontainer.json）を別ウィンドウで開く。
+  "name": "report-sandbox / api (Hono + DuckDB)",
+  "dockerComposeFile": "../../docker-compose.yml",
+  "service": "api",
+  // リポジトリ全体はマウントされているが、編集の起点は api/ に絞る
+  "workspaceFolder": "/workspace/api",
+
+  "forwardPorts": [8787],
+  "portsAttributes": {
+    "8787": { "label": "Report API (api)", "onAutoForward": "silent" }
+  },
+
+  "postCreateCommand": "echo 'api コンテナ準備完了。依存が未インストールなら npm install、起動は npm run dev'",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "biomejs.biome",
+        "ms-azuretools.vscode-docker",
+        "mtxr.sqltools"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "biomejs.biome"
+      }
+    }
+  },
+
+  "remoteUser": "node"
+}

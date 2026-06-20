@@ -1,18 +1,22 @@
 import { Hono } from "hono";
-import { cors } from "hono/cors";
 import { serve } from "@hono/node-server";
+import { corsMiddleware } from "./middlewares/cors";
 import { reports } from "./routes/reports";
 
 // ─────────────────────────────────────────────
 // レポートAPI（Hono + DuckDB）
-// ここは「app の組み立て」と「起動」だけを担当する。
-//   - DB（DuckDB）まわり … db.ts
-//   - レポートのルート     … routes/reports.ts
+// ここは「app の組み立て」と「起動」だけを担当する（合成ルート / Composition Root）。
+// 各層の責務：
+//   - routes/        … HTTP（プレゼンテーション層）
+//   - services/      … 業務ロジック
+//   - repositories/  … データアクセス（SQL）
+//   - db/            … DB 接続（インフラ層）
+//   - middlewares/   … CORS など横断的関心事
 // ─────────────────────────────────────────────
 
 // RPC を効かせるため、ここもメソッドチェーンで組み立てる。
 const app = new Hono()
-  .use("/*", cors({ origin: ["http://localhost:3000"] }))
+  .use("/*", corsMiddleware)
   // 動作確認
   .get("/health", (c) => c.json({ ok: true }))
   // レポート系をまとめてマウント（パスの接頭辞はここで一括指定）
@@ -23,5 +27,5 @@ const app = new Hono()
 export type AppType = typeof app;
 
 serve({ fetch: app.fetch, port: 8787, hostname: "0.0.0.0" }, (info) => {
-  console.log(`Report API listening on http://localhost:${info.port}`);
+  console.log(`Report API listening on http://127.0.0.1:${info.port}`);
 });

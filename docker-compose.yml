@@ -7,9 +7,9 @@ services:
       context: ./api
       dockerfile: Dockerfile
     volumes:
-      - ./api:/workspace/api
-      # レポート元データ(data/)を api から読めるようにマウント
-      - ./data:/workspace/data
+      # devcontainer を api サービスに相乗りさせるため、リポジトリ全体をマウント
+      # （web/ も同じコンテナから編集できるようにする。data も /workspace/data に含まれる）
+      - .:/workspace
     working_dir: /workspace/api
     ports:
       - "8787:8787"
