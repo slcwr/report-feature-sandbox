@@ -7,4 +7,7 @@ import { cors } from "hono/cors";
 // ─────────────────────────────────────────────
 export const corsMiddleware = cors({
   origin: ["http://localhost:3000"],
+  // Cookie(JWT) をクロスオリジンで送受信するために必須。
+  // credentials を立てる時は origin に "*" を使えない（具体的なオリジンを列挙する）。
+  credentials: true,
 });

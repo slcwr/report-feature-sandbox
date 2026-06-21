@@ -17,7 +17,44 @@ services:
       - NODE_ENV=development
       # data フォルダの場所を環境変数で渡す
       - DATA_DIR=/workspace/data
+      # 機能用 RDB（MySQL）への接続。本番は TiDB に差し替える想定。
+      # ホストは compose のサービス名 "db" で名前解決される。
+      - DATABASE_URL=mysql://app:app@db:3306/app
+      # JWT 署名鍵（開発用。本番は十分長いランダム値を Secrets で渡す）。
+      - JWT_SECRET=dev-secret-change-me
     command: sleep infinity
+    depends_on:
+      db:
+        # db が「起動した」だけでなく「接続を受け付ける」状態になってから api を起動
+        condition: service_healthy
+
+  # ───────────────────────────────
+  # db: MySQL 8（機能用 RDB / 本番 TiDB の代役）
+  #   TiDB は MySQL 互換なので、Drizzle は dialect: "mysql" で共通。
+  #   ローカルはこの MySQL8、本番は接続先(DATABASE_URL)を TiDB に差し替えるだけ。
+  # ───────────────────────────────
+  db:
+    image: mysql:8.0
+    # TiDB 学習の落とし穴対策として、ローカルでも文字コードは utf8mb4 に揃える
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=app
+      - MYSQL_USER=app
+      - MYSQL_PASSWORD=app
+    ports:
+      # ホストからGUIツール(TablePlus等)で繋ぎたい時用に公開
+      - "3306:3306"
+    volumes:
+      # データを永続化（コンテナを作り直してもDBが消えない）
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      # api の depends_on(service_healthy) が参照する。接続可能になるまで待たせる。
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
   # ───────────────────────────────
   # web: React Router v7（Remix）フロント / 開発拠点
@@ -38,3 +75,9 @@ services:
     command: sleep infinity
     depends_on:
       - api
+
+# ───────────────────────────────
+# 名前付きボリューム（MySQL のデータ永続化用）
+# ───────────────────────────────
+volumes:
+  mysql-data:

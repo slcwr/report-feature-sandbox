@@ -8,9 +8,11 @@
   // リポジトリ全体はマウントされているが、編集の起点は api/ に絞る
   "workspaceFolder": "/workspace/api",
 
-  "forwardPorts": [8787],
+  "forwardPorts": [8787, 3306],
   "portsAttributes": {
-    "8787": { "label": "Report API (api)", "onAutoForward": "silent" }
+    "8787": { "label": "Report API (api)", "onAutoForward": "silent" },
+    // 機能用 RDB（MySQL / 本番は TiDB 想定）。GUIツールから繋ぎたい時用。
+    "3306": { "label": "MySQL (db)", "onAutoForward": "silent" }
   },
 
   "postCreateCommand": "echo 'api コンテナ準備完了。依存が未インストールなら npm install、起動は npm run dev'",
@@ -20,7 +22,9 @@
       "extensions": [
         "biomejs.biome",
         "ms-azuretools.vscode-docker",
-        "mtxr.sqltools"
+        "mtxr.sqltools",
+        // SQLTools から MySQL(db) に繋ぐためのドライバ
+        "mtxr.sqltools-driver-mysql"
       ],
       "settings": {
         "editor.formatOnSave": true,

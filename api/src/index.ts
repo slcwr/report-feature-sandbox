@@ -2,6 +2,8 @@ import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { corsMiddleware } from "./middlewares/cors";
 import { reports } from "./routes/reports";
+import { auth } from "./routes/auth";
+import { AuthError } from "./services/auth";
 
 // ─────────────────────────────────────────────
 // レポートAPI（Hono + DuckDB）
@@ -20,7 +22,18 @@ const app = new Hono()
   // 動作確認
   .get("/health", (c) => c.json({ ok: true }))
   // レポート系をまとめてマウント（パスの接頭辞はここで一括指定）
-  .route("/api/reports", reports);
+  .route("/api/reports", reports)
+  // 認証系（登録・ログイン・ログアウト・自分の情報）
+  .route("/api/auth", auth)
+  // 業務エラー(AuthError)を HTTP ステータスに変換する。
+  // service 層は Hono を知らずに throw でき、ここで一括変換する。
+  .onError((err, c) => {
+    if (err instanceof AuthError) {
+      return c.json({ error: err.message }, err.status);
+    }
+    console.error(err);
+    return c.json({ error: "サーバーエラーが発生しました" }, 500);
+  });
 
 // RPC クライアント（hc<AppType>）が参照する型。
 // web 側はこの型だけを import すれば、型安全に api を呼べる。
