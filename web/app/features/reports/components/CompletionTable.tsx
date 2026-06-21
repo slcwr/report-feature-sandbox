@@ -3,7 +3,7 @@
 // データは props で受け取るだけ。取得方法（api）は知らない。
 // ─────────────────────────────────────────────
 import type { CompletionBySchoolRow } from "../types";
-import { ReportTable, th, td } from "./table";
+import { ReportTable, td, th } from "./table";
 
 export function CompletionTable({ rows }: { rows: CompletionBySchoolRow[] }) {
   return (

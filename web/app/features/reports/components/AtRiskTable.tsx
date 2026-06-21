@@ -2,7 +2,7 @@
 // フォローアップ対象生徒テーブルのUI（平均進捗が低い生徒）
 // ─────────────────────────────────────────────
 import type { AtRiskStudentRow } from "../types";
-import { ReportTable, th, td } from "./table";
+import { ReportTable, td, th } from "./table";
 
 export function AtRiskTable({ rows }: { rows: AtRiskStudentRow[] }) {
   return (

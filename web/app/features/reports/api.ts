@@ -10,7 +10,7 @@ import type { AppType } from "../../../../api/src/index";
 // web 側の「契約」となる行の型（features 内の葉）。
 // 戻り値の型注釈に使うことで、依存の向きを api → types（下向き）に保ちつつ、
 // hc<AppType> の推論結果がこの契約に適合するかを TS にチェックさせる。
-import type { CompletionBySchoolRow, VideoRankingRow, AtRiskStudentRow } from "./types";
+import type { AtRiskStudentRow, CompletionBySchoolRow, VideoRankingRow } from "./types";
 
 // サーバー間通信なので、ブラウザ用の localhost ではなく
 // docker のサービス名 api を使う（環境変数 API_URL で渡している）。

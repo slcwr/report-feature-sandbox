@@ -2,7 +2,7 @@
 // 動画ランキングテーブルのUI
 // ─────────────────────────────────────────────
 import type { VideoRankingRow } from "../types";
-import { ReportTable, th, td } from "./table";
+import { ReportTable, td, th } from "./table";
 
 export function VideoRankingTable({ rows }: { rows: VideoRankingRow[] }) {
   return (

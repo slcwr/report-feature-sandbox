@@ -1,0 +1,6 @@
+{
+  // Tailwind v4 は @theme / @apply / @variant などの at-rule を使う。
+  // VS Code 標準の CSS バリデータはこれらを知らず「Unknown at rule」を出すので無効化する。
+  // （構文の検証は Biome の css.parser.tailwindDirectives 側が担当する）
+  "css.lint.unknownAtRules": "ignore"
+}
