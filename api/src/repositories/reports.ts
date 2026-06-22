@@ -1,4 +1,5 @@
 import { query, CSV } from "../db";
+import type { AtRiskStudentRow, CompletionBySchoolRow, VideoRankingRow } from "../interface/reports";
 
 // ─────────────────────────────────────────────
 // データアクセス層（Repository）
@@ -6,13 +7,6 @@ import { query, CSV } from "../db";
 // HTTP のことも、業務ルールのことも知らない。
 // ここで定義した行の型が service → route → web(RPC) まで伝わる。
 // ─────────────────────────────────────────────
-
-// ① 学校別の完了率
-export type CompletionBySchoolRow = {
-  school_id: string;
-  total_views: number;
-  completion_rate: number;
-};
 
 export function findCompletionBySchool() {
   return query<CompletionBySchoolRow>(`
@@ -25,13 +19,6 @@ export function findCompletionBySchool() {
   `);
 }
 
-// ② 動画別ランキング
-export type VideoRankingRow = {
-  video_title: string;
-  views: number;
-  avg_progress: number;
-};
-
 export function findVideoRanking() {
   return query<VideoRankingRow>(`
     SELECT video_title,
@@ -42,14 +29,6 @@ export function findVideoRanking() {
     ORDER BY views DESC
   `);
 }
-
-// ③ 要注意の生徒（平均進捗が低い順）
-export type AtRiskStudentRow = {
-  student_id: string;
-  school_id: string;
-  avg_progress: number;
-  watched: number;
-};
 
 export function findAtRiskStudents() {
   return query<AtRiskStudentRow>(`

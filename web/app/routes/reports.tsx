@@ -3,13 +3,12 @@
 // ここは「features を呼ぶだけ」。データ取得は features/reports/api、
 // 表示は features/reports/components に任せる。
 // ─────────────────────────────────────────────
-
+import { requireUser } from "~/features/auth/require-auth.server";
 import { getReports } from "~/features/reports/api";
 import { AtRiskTable } from "~/features/reports/components/AtRiskTable";
 import { CompletionTable } from "~/features/reports/components/CompletionTable";
 import { VideoRankingTable } from "~/features/reports/components/VideoRankingTable";
 import type { Route } from "./+types/reports";
-import { requireUser } from "~/features/auth/require-auth.server";
 
 // loader：サーバー側で実行され、features の api からレポートデータを取得する
 export async function loader({ request }: Route.LoaderArgs) {
