@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import * as reportsService from "../services/reports";
+import { authMiddleware } from "../middlewares/auth";
 
 // ─────────────────────────────────────────────
 // プレゼンテーション層（Route / Controller）
@@ -11,6 +12,8 @@ import * as reportsService from "../services/reports";
 //   この reports の型を index.ts 側で typeof して RPC クライアントに渡す。
 // ─────────────────────────────────────────────
 export const reports = new Hono()
+  // 認証必須：以降のレポート系は Bearer トークンが検証できた時だけ通す。
+  .use("/*", authMiddleware)
   // ① 学校別の完了率
   .get("/completion-by-school", async (c) => {
     return c.json(await reportsService.getCompletionBySchool());

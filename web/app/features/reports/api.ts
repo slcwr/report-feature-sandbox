@@ -23,15 +23,17 @@ const client = hc<AppType>(apiUrl);
 // route はこの 1 関数を呼ぶだけでよくなる。
 // 戻り値の型を明示することで、api が非互換に変わると（hc の推論結果が
 // 下の型に代入できなくなり）ここでコンパイルエラーになる＝ドリフト検知。
-export async function getReports(): Promise<{
+export async function getReports(token: string): Promise<{
   completionBySchool: CompletionBySchoolRow[];
   videoRanking: VideoRankingRow[];
   atRiskStudent: AtRiskStudentRow[];
 }> {
+  // 保護された API なので、session に保存しておいた JWT を Bearer で添える。
+  const headers = { Authorization: `Bearer ${token}` };
   const [completionBySchool, videoRanking, atRiskStudent] = await Promise.all([
-    client.api.reports["completion-by-school"].$get().then((res) => res.json()),
-    client.api.reports["video-ranking"].$get().then((res) => res.json()),
-    client.api.reports["at-risk-students"].$get().then((res) => res.json()),
+    client.api.reports["completion-by-school"].$get({}, { headers }).then((res) => res.json()),
+    client.api.reports["video-ranking"].$get({}, { headers }).then((res) => res.json()),
+    client.api.reports["at-risk-students"].$get({}, { headers }).then((res) => res.json()),
   ]);
 
   return { completionBySchool, videoRanking, atRiskStudent };

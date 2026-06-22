@@ -45,8 +45,11 @@ export function LoginForm({ actionResult }: LoginFormProps) {
         />
       </label>
 
-      <button type="submit" disabled={isSubmitting} style={buttonStyle}>
+      <button type="submit" name="intent" value="login" disabled={isSubmitting} style={buttonStyle}>
         {isSubmitting ? "ログイン中..." : "ログイン"}
+      </button>
+      <button type="submit" name="intent" value="register" style={buttonStyle}>
+        新規登録
       </button>
     </Form>
   );

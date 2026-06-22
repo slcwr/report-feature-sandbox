@@ -1,32 +1,16 @@
 import { Hono } from "hono";
-import { setCookie, deleteCookie } from "hono/cookie";
-import type { Context } from "hono";
 import * as authService from "../services/auth";
 import { authMiddleware } from "../middlewares/auth";
 import * as usersRepository from "../repositories/users";
 
 // ─────────────────────────────────────────────
 // プレゼンテーション層（Route / auth）
-// HTTP のことだけを担当：入力の受け取り、Cookie の付与、JSON で返す。
+// HTTP のことだけを担当：入力の受け取り、トークンの発行、JSON で返す。
+// トークンは body で返し、呼び出し側が Authorization: Bearer で添える運用。
 // 業務ロジックは services/auth に委譲する。
 //
 // ※ RPC を効かせるため、必ずメソッドチェーンで定義する。
 // ─────────────────────────────────────────────
-
-const COOKIE_NAME = "token";
-const TOKEN_TTL_SEC = 60 * 60 * 24 * 7; // 7日（service 側の TTL と揃える）
-
-// JWT を HttpOnly Cookie として付与する（JS から読めない＝XSS に強い）。
-function setAuthCookie(c: Context, token: string) {
-  setCookie(c, COOKIE_NAME, token, {
-    httpOnly: true,
-    sameSite: "Lax",
-    path: "/",
-    maxAge: TOKEN_TTL_SEC,
-    // 本番(HTTPS)でのみ secure を立てる。ローカルは http なので false。
-    secure: process.env.NODE_ENV === "production",
-  });
-}
 
 export const auth = new Hono()
   // 新規登録：作成して、そのままログイン状態にする。
@@ -37,22 +21,21 @@ export const auth = new Hono()
     }>();
     const user = await authService.register(email, password);
     const token = await authService.issueToken(user.id);
-    setAuthCookie(c, token);
-    return c.json({ user }, 201);
+    return c.json({ user, token }, 201);
   })
-  // ログイン：照合してトークンを Cookie に。
+  // ログイン：照合してトークンを body で返す（呼び出し側が Bearer で使う）。
   .post("/login", async (c) => {
     const { email, password } = await c.req.json<{
       email: string;
       password: string;
     }>();
     const { user, token } = await authService.login(email, password);
-    setAuthCookie(c, token);
-    return c.json({ user });
+    return c.json({ user, token });
   })
-  // ログアウト：Cookie を消すだけ（JWT はステートレスなので即時失効はしない点に注意）。
+  // ログアウト：JWT はステートレスなので、サーバ側で消すものは無い。
+  // 実際のログアウトは「クライアントが持っているトークンを破棄する」こと。
+  // （即時失効が必要なら、別途トークンの失効リスト等が要る。今回は対象外。）
   .post("/logout", (c) => {
-    deleteCookie(c, COOKIE_NAME, { path: "/" });
     return c.json({ ok: true });
   })
   // 自分の情報：authMiddleware を通過した時だけ届く。

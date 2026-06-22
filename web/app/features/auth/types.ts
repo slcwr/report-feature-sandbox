@@ -24,7 +24,7 @@ export type LoginActionResult = {
 
 // ── セッション（cookie）に保存する中身 ──
 // session.server.ts の SessionData と一致させる。
-// 必要最小限だけ持つ（cookieは4KB制限があり、機密も載せない）。
+// API が発行した JWT を保持し、API 呼び出し時に Bearer として添える。
 export type SessionData = {
-  userId: number;
+  token: string;
 };

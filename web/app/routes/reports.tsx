@@ -13,8 +13,10 @@ import { requireUser } from "~/features/auth/require-auth.server";
 
 // loader：サーバー側で実行され、features の api からレポートデータを取得する
 export async function loader({ request }: Route.LoaderArgs) {
-  await requireUser(request); // 未ログインなら requireUser 内の throw redirect("/login") でここで中断
-  return getReports();
+  // 未ログインなら requireUser 内の throw redirect("/login") でここで中断。
+  // ログイン済みなら session に保存した JWT を取り出し、API へ Bearer で渡す。
+  const { token } = await requireUser(request);
+  return getReports(token);
 }
 
 // 画面：loader が取ったデータを features のコンポーネントに渡すだけ

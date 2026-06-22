@@ -1,6 +1,7 @@
 import { createCookieSessionStorage } from "react-router";
 
-type SessionData = { userId: number };
+// API が発行した JWT をそのまま保持し、API 呼び出し時に Bearer で添える。
+type SessionData = { token: string };
 
 export const { getSession, commitSession, destroySession } =
   createCookieSessionStorage<SessionData>({
