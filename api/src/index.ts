@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { corsMiddleware } from "./middlewares/cors";
 import { reports } from "./routes/reports";
+import { notes } from "./routes/notes";
 import { auth } from "./routes/auth";
 import { AuthError } from "./services/auth";
 
@@ -23,6 +24,8 @@ const app = new Hono()
   .get("/health", (c) => c.json({ ok: true }))
   // レポート系をまとめてマウント（パスの接頭辞はここで一括指定）
   .route("/api/reports", reports)
+  // レポート系をまとめてマウント（パスの接頭辞はここで一括指定）
+  .route("/api/notes", notes)
   // 認証系（登録・ログイン・ログアウト・自分の情報）
   .route("/api/auth", auth)
   // 業務エラー(AuthError)を HTTP ステータスに変換する。

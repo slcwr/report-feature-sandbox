@@ -1,12 +1,13 @@
 // ─────────────────────────────────────────────
 // フォローアップ対象生徒テーブルのUI（平均進捗が低い生徒）
 // ─────────────────────────────────────────────
+import { Table, td, th } from "~/shared/components/table";
 import type { AtRiskStudentRow } from "../types";
-import { ReportTable, td, th } from "./table";
+
 
 export function AtRiskTable({ rows }: { rows: AtRiskStudentRow[] }) {
   return (
-    <ReportTable title="フォローアップ対象生徒">
+    <Table title="フォローアップ対象生徒">
       <thead>
         <tr>
           <th style={th}>生徒</th>
@@ -25,6 +26,6 @@ export function AtRiskTable({ rows }: { rows: AtRiskStudentRow[] }) {
           </tr>
         ))}
       </tbody>
-    </ReportTable>
+    </Table>
   );
 }

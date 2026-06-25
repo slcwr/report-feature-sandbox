@@ -1,12 +1,12 @@
 // ─────────────────────────────────────────────
 // 動画ランキングテーブルのUI
 // ─────────────────────────────────────────────
+import { Table, td, th } from "~/shared/components/table";
 import type { VideoRankingRow } from "../types";
-import { ReportTable, td, th } from "./table";
 
 export function VideoRankingTable({ rows }: { rows: VideoRankingRow[] }) {
   return (
-    <ReportTable title="動画ランキング">
+    <Table title="動画ランキング">
       <thead>
         <tr>
           <th style={th}>動画タイトル</th>
@@ -23,6 +23,6 @@ export function VideoRankingTable({ rows }: { rows: VideoRankingRow[] }) {
           </tr>
         ))}
       </tbody>
-    </ReportTable>
+    </Table>
   );
 }

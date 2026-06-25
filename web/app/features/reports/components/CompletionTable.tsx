@@ -2,12 +2,12 @@
 // 完了率テーブルのUI（学校別の完了率）
 // データは props で受け取るだけ。取得方法（api）は知らない。
 // ─────────────────────────────────────────────
+import { Table, td, th } from "~/shared/components/table";
 import type { CompletionBySchoolRow } from "../types";
-import { ReportTable, td, th } from "./table";
 
 export function CompletionTable({ rows }: { rows: CompletionBySchoolRow[] }) {
   return (
-    <ReportTable title="学校別 完了率レポート">
+    <Table title="学校別 完了率レポート">
       <thead>
         <tr>
           <th style={th}>学校</th>
@@ -24,6 +24,6 @@ export function CompletionTable({ rows }: { rows: CompletionBySchoolRow[] }) {
           </tr>
         ))}
       </tbody>
-    </ReportTable>
+    </Table>
   );
 }

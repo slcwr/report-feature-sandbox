@@ -1,0 +1,1 @@
+ALTER TABLE `student_notes` MODIFY COLUMN `student_id` bigint NOT NULL;

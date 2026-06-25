@@ -1,4 +1,4 @@
-import { mysqlTable, bigint, varchar, timestamp } from "drizzle-orm/mysql-core";
+import { mysqlTable, bigint, varchar, timestamp, mysqlEnum } from "drizzle-orm/mysql-core";
 
 // ─────────────────────────────────────────────
 // DB スキーマ（Drizzle / dialect: mysql）
@@ -22,6 +22,17 @@ export const users = mysqlTable("users", {
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 });
 
+export const student_notes = mysqlTable( "student_notes" , {
+  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
+  student_id: bigint("student_id", { mode: "number" }).notNull().unique(),
+  author_id: bigint("author_id", { mode: "number" }).notNull(),
+  body: varchar("body", { length: 1000 }),
+  status: mysqlEnum("status", ["open","in_progress","done"]).notNull(), 
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+}) 
+
 // テーブル定義から行の型を導出（select 用 / insert 用）。
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+export type StudentNotes = typeof student_notes.$inferSelect;

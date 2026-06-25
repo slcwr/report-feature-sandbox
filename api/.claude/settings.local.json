@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mysql -happ_placeholder)",
+      "Bash(mysql -hdb -uapp -papp app -e \"SHOW TABLES;\")"
+    ]
+  }
+}

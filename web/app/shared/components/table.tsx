@@ -14,7 +14,7 @@ export const th = {
 export const td = { border: "1px solid #ccc", padding: "8px" };
 
 // 見出し付きのテーブル枠。中身（thead/tbody）だけ差し込めばよい。
-export function ReportTable({ title, children }: { title: string; children: ReactNode }) {
+export function Table({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div style={{ fontFamily: "system-ui", maxWidth: 640, margin: "40px auto" }}>
       <h1>{title}</h1>

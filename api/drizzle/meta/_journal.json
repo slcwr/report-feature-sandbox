@@ -8,6 +8,20 @@
       "when": 1781963222945,
       "tag": "0000_puzzling_harpoon",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1782217711273,
+      "tag": "0001_rapid_ink",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1782221265231,
+      "tag": "0002_next_puma",
+      "breakpoints": true
     }
   ]
 }
