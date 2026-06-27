@@ -1,6 +1,7 @@
 import { hc } from "hono/client";
 import type { AppType } from "../../../../api/src/index";
 
+
 const apiUrl = process.env.API_URL ?? "http://localhost:8787";
 
 // Hono RPC クライアント。fetch の代わりにメソッド呼び出しで api を叩く。
@@ -14,6 +15,16 @@ export async function getStudentsNotes(token: string, studentId: number) {
   const notesByStudentId = await client.api.notes.notes[":id"]
     .$get({ param: { id: String(studentId) } }, { headers })
     .then((res) => res.json());
-
+  console.log("notesByStudentId",notesByStudentId);
   return notesByStudentId;
+}
+
+// ノートを新規作成する。author_id は api 側で JWT から補うので送らない。
+export async function createStudentNote(
+  token: string,
+  input: { student_id: number; body: string; status: "open" | "in_progress" | "done" },
+) {
+  const headers = { Authorization: `Bearer ${token}` };
+  const res = await client.api.notes.notes.$post({ json: input }, { headers });
+  return res.json();
 }

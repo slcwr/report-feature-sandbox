@@ -24,7 +24,7 @@ export const users = mysqlTable("users", {
 
 export const student_notes = mysqlTable( "student_notes" , {
   id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
-  student_id: bigint("student_id", { mode: "number" }).notNull().unique(),
+  student_id: bigint("student_id", { mode: "number" }).notNull(),
   author_id: bigint("author_id", { mode: "number" }).notNull(),
   body: varchar("body", { length: 1000 }),
   status: mysqlEnum("status", ["open","in_progress","done"]).notNull(), 
@@ -36,3 +36,4 @@ export const student_notes = mysqlTable( "student_notes" , {
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type StudentNotes = typeof student_notes.$inferSelect;
+export type NewStudentNotes = typeof student_notes.$inferInsert;
