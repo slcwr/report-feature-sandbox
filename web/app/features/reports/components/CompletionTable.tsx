@@ -10,17 +10,17 @@ export function CompletionTable({ rows }: { rows: CompletionBySchoolRow[] }) {
     <Table title="学校別 完了率レポート">
       <thead>
         <tr>
-          <th style={th}>学校</th>
-          <th style={th}>視聴数</th>
-          <th style={th}>完了率(%)</th>
+          <th className={th}>学校</th>
+          <th className={th}>視聴数</th>
+          <th className={th}>完了率(%)</th>
         </tr>
       </thead>
       <tbody>
         {rows.map((row) => (
           <tr key={row.school_id}>
-            <td style={td}>{row.school_id}</td>
-            <td style={td}>{row.total_views}</td>
-            <td style={td}>{row.completion_rate}</td>
+            <td className={td}>{row.school_id}</td>
+            <td className={td}>{row.total_views}</td>
+            <td className={td}>{row.completion_rate}</td>
           </tr>
         ))}
       </tbody>

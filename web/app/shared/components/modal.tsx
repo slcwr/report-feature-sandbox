@@ -1,43 +1,21 @@
 // ─────────────────────────────────────────────
 // 汎用モーダル（オーバーレイ + 中央のパネル）
 // open で表示/非表示を切り替え、背景クリックと×ボタンで onClose を呼ぶ。
-// 見た目は table.tsx と同じくインラインの style オブジェクトで持つ。
+// 見た目は Tailwind のユーティリティクラスで表現する。
 // ─────────────────────────────────────────────
 import type { ReactNode } from "react";
 
-const overlay = {
-  position: "fixed" as const,
-  inset: 0,
-  background: "rgba(0, 0, 0, 0.4)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: 1000,
-};
+const overlay = "fixed inset-0 z-[1000] flex items-center justify-center";
 
-const panel = {
-  fontFamily: "system-ui",
-  background: "#fff",
-  borderRadius: "8px",
-  padding: "24px",
-  width: "min(90vw, 480px)",
-  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
-};
+// 背景（オーバーレイ）。クリックで閉じるので、操作可能な本物の <button> にする。
+const backdrop = "absolute inset-0 cursor-default border-none bg-black/40";
 
-const header = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  marginBottom: "16px",
-};
+const panel =
+  "relative z-10 w-[min(90vw,480px)] rounded-lg bg-white p-6 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.2)]";
 
-const closeButton = {
-  border: "none",
-  background: "transparent",
-  fontSize: "20px",
-  lineHeight: 1,
-  cursor: "pointer",
-};
+const header = "mb-4 flex items-center justify-between";
+
+const closeButton = "cursor-pointer border-none bg-transparent text-xl leading-none";
 
 export function Modal({
   open,
@@ -54,25 +32,26 @@ export function Modal({
   if (!open) return null;
 
   return (
-    // 背景（オーバーレイ）クリックで閉じる。
-    <div
-      style={overlay}
-      onClick={onClose}
-      onKeyDown={(e) => {
-        if (e.key === "Escape") onClose();
-      }}
-    >
-      {/* パネル内のクリックは背景に伝播させない（＝閉じない）。 */}
+    <div className={overlay}>
+      {/* 背景クリックで閉じる、画面全体を覆う透明ボタン。パネルの背面に置く。 */}
+      <button type="button" className={backdrop} aria-label="閉じる" onClick={onClose} />
       <div
-        style={panel}
+        className={panel}
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") onClose();
+        }}
       >
-        <div style={header}>
-          <h2 style={{ margin: 0, fontSize: "18px" }}>{title}</h2>
-          <button type="button" style={closeButton} aria-label="閉じる" onClick={onClose}>
+        <div className={header}>
+          <h2 className="m-0 text-lg">{title}</h2>
+          <button
+            type="button"
+            className={closeButton}
+            aria-label="閉じる"
+            onClick={onClose}
+          >
             ×
           </button>
         </div>
