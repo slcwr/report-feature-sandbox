@@ -2,7 +2,7 @@
 // 学習フォローアップメモのUI
 // ─────────────────────────────────────────────
 import { useState } from "react";
-import { Form } from "react-router";
+import { Form, useSearchParams } from "react-router";
 import { Modal } from "~/shared/components/modal";
 import { Table } from "~/shared/components/table";
 import type { StudentNotesResponse } from "../types";
@@ -15,11 +15,19 @@ const labelText = "mb-1 block text-sm";
 const input = "w-full box-border rounded-md border border-gray-300 p-2 text-sm";
 const button =
   "rounded-md bg-blue-600 px-4 py-2 text-sm text-white cursor-pointer hover:bg-blue-700";
+// ページネーションの「前へ／次へ」ボタン。無効時は薄く＋カーソル無効。
+const pagerButton =
+  "rounded-md border border-gray-300 px-3 py-1 text-sm cursor-pointer hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40";
 
 export function FollowTable({ data }: { data: StudentNotesResponse | null }) {
+  const [_, setSearchParams] = useSearchParams();
   // モーダルの開閉状態。ボタンで開き、× / 背景クリックで閉じる。
   const [open, setOpen] = useState(false);
   const rows = data?.items ?? [];
+
+  const handlePageChange = (newPage: number) => {
+    setSearchParams({ page: String(newPage) });
+  };
 
   return (
     <>
@@ -49,6 +57,32 @@ export function FollowTable({ data }: { data: StudentNotesResponse | null }) {
           )}
         </tbody>
       </Table>
+      {/* ページネーション UI（ページが2つ以上あるときだけ表示） */}
+      {data && data.pagination.totalPages > 1 && (
+        <div className="my-4 flex items-center justify-center gap-4">
+          <button
+            type="button"
+            className={pagerButton}
+            onClick={() => handlePageChange(data.pagination.page - 1)}
+            disabled={!data.pagination.hasPrev}
+          >
+            前へ
+          </button>
+
+          <span className="text-sm text-gray-600">
+            {data.pagination.page} / {data.pagination.totalPages}
+          </span>
+
+          <button
+            type="button"
+            className={pagerButton}
+            onClick={() => handlePageChange(data.pagination.page + 1)}
+            disabled={!data.pagination.hasNext}
+          >
+            次へ
+          </button>
+        </div>
+      )}
 
       <button
         type="button"
