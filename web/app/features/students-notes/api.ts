@@ -12,8 +12,8 @@ export async function getStudentsNotes(token: string, studentId: number) {
   const headers = { Authorization: `Bearer ${token}` };
   // /api/notes/notes/:id を叩く。:id は [":id"] でアクセスし、値は param で渡す。
   // Hono RPC では param は文字列なので String() で変換する。
-  const notesByStudentId = await client.api.notes.notes[":id"]
-    .$get({ param: { id: String(studentId) } }, { headers })
+  const notesByStudentId = await client.api.notes.notes[":student_id"]
+    .$get({ param: { student_id: String(studentId) } }, { headers })
     .then((res) => res.json());
   console.log("notesByStudentId",notesByStudentId);
   return notesByStudentId;

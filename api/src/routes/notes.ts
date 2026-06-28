@@ -20,7 +20,9 @@ export const notes = new Hono()
     return c.json({ id }, 201);
   })
 
-  .get("/notes/:id", async (c) => {
-    const id = Number(c.req.param("id"));
-    return c.json(await notesService.getByStudentId(id));
+  .get("/notes/:student_id", async (c) => {
+    const id = Number(c.req.param("student_id"));
+    const page = Number(c.req.param("page"));
+    const limit = Number(c.req.param("limit"));
+    return c.json(await notesService.getByStudentId(id,page,limit));
   });
