@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { validator } from "hono/validator";
 import * as notesService from "../services/notes";
 import { authMiddleware } from "../middlewares/auth";
 
@@ -20,9 +21,17 @@ export const notes = new Hono()
     return c.json({ id }, 201);
   })
 
-  .get("/notes/:student_id", async (c) => {
-    const id = Number(c.req.param("student_id"));
-    const page = Number(c.req.param("page"));
-    const limit = Number(c.req.param("limit"));
-    return c.json(await notesService.getByStudentId(id,page,limit));
-  });
+  // ページネーションはクエリ文字列（?page=&limit=）。
+  // validator で数値化＋デフォルト値を与えると、RPC クライアントの型にも query が生える。
+  .get(
+    "/notes/:student_id",
+    validator("query", (value) => ({
+      page: Number(value.page ?? "1"),
+      limit: Number(value.limit ?? "20"),
+    })),
+    async (c) => {
+      const id = Number(c.req.param("student_id"));
+      const { page, limit } = c.req.valid("query");
+      return c.json(await notesService.getByStudentId(id, page, limit));
+    },
+  );

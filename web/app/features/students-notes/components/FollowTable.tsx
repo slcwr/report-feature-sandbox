@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Form } from "react-router";
 import { Modal } from "~/shared/components/modal";
 import { Table } from "~/shared/components/table";
-import type { StudentNotesRow } from "../types";
+import type { StudentNotesResponse } from "../types";
 
 // セル・フォーム要素のスタイルは Tailwind のユーティリティクラスで表現する。
 const th = "border border-gray-300 bg-gray-100 p-2 text-left";
@@ -13,11 +13,13 @@ const td = "border border-gray-300 p-2";
 const field = "mb-4 block";
 const labelText = "mb-1 block text-sm";
 const input = "w-full box-border rounded-md border border-gray-300 p-2 text-sm";
-const button = "rounded-md bg-blue-600 px-4 py-2 text-sm text-white cursor-pointer hover:bg-blue-700";
+const button =
+  "rounded-md bg-blue-600 px-4 py-2 text-sm text-white cursor-pointer hover:bg-blue-700";
 
-export function FollowTable({ rows }: { rows: StudentNotesRow[] | null }) {
+export function FollowTable({ data }: { data: StudentNotesResponse | null }) {
   // モーダルの開閉状態。ボタンで開き、× / 背景クリックで閉じる。
   const [open, setOpen] = useState(false);
+  const rows = data?.items ?? [];
 
   return (
     <>
@@ -30,7 +32,7 @@ export function FollowTable({ rows }: { rows: StudentNotesRow[] | null }) {
           </tr>
         </thead>
         <tbody>
-          {rows && rows.length > 0 ? (
+          {rows.length > 0 ? (
             rows.map((row) => (
               <tr key={row.student_id}>
                 <td className={td}>{row.student_id}</td>
@@ -48,7 +50,11 @@ export function FollowTable({ rows }: { rows: StudentNotesRow[] | null }) {
         </tbody>
       </Table>
 
-      <button type="button" className={`mx-auto mb-10 block ${button}`} onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className={`mx-auto mb-10 block ${button}`}
+        onClick={() => setOpen(true)}
+      >
         新規作成
       </button>
 

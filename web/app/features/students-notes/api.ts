@@ -7,15 +7,20 @@ const apiUrl = process.env.API_URL ?? "http://localhost:8787";
 // Hono RPC クライアント。fetch の代わりにメソッド呼び出しで api を叩く。
 const client = hc<AppType>(apiUrl);
 
-export async function getStudentsNotes(token: string, studentId: number) {
+export async function getStudentsNotes(token: string, studentId: number, page: number, limit: number) {
   // 保護された API なので、session に保存しておいた JWT を Bearer で添える。
   const headers = { Authorization: `Bearer ${token}` };
-  // /api/notes/notes/:id を叩く。:id は [":id"] でアクセスし、値は param で渡す。
-  // Hono RPC では param は文字列なので String() で変換する。
+  // パスの :student_id は param、ページネーションは query で渡す。
+  // Hono RPC では param / query とも文字列なので String() で変換する。
   const notesByStudentId = await client.api.notes.notes[":student_id"]
-    .$get({ param: { student_id: String(studentId) } }, { headers })
+    .$get(
+      {
+        param: { student_id: String(studentId) },
+        query: { page: String(page), limit: String(limit) },
+      },
+      { headers },
+    )
     .then((res) => res.json());
-  console.log("notesByStudentId",notesByStudentId);
   return notesByStudentId;
 }
 

@@ -8,10 +8,13 @@ import type { Route } from "./+types/students-notes";
 export async function loader({ request, params }: Route.LoaderArgs) {
   // 未ログインなら requireUser 内の throw redirect("/login") でここで中断。
   const { token } = await requireUser(request);
-  // URL の /students/:studentId/notes から生徒IDを取り出す（文字列なので数値へ）。
+  // パスから生徒IDを取り出す（文字列なので数値へ）。
   const studentId = Number(params.studentId);
-  console.log("params",params);
-  return getStudentsNotes(token, studentId);
+  // ページネーションはクエリ文字列（?page=&limit=）。無ければデフォルト値。
+  const url = new URL(request.url);
+  const page = Number(url.searchParams.get("page") ?? "1");
+  const limit = Number(url.searchParams.get("limit") ?? "20");
+  return getStudentsNotes(token, studentId, page, limit);
 }
 
 // action：フォーム送信（POST）を受け、API にノートを作成する。
@@ -31,5 +34,5 @@ export async function action({ request, params }: Route.ActionArgs) {
 }
 
 export default function StudentsNotes({ loaderData }: Route.ComponentProps) {
-  return <FollowTable rows={loaderData ?? null} />;
+  return <FollowTable data={loaderData ?? null} />;
 }

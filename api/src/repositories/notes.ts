@@ -2,7 +2,7 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "../db/mysql";
 import { student_notes, type NewStudentNotes, type StudentNotes } from "../db/schema";
 
-export async function findByStudentId(student_id: number, limit: number, offset: number): Promise<StudentNotes[] | undefined> {
+export async function findByStudentId(student_id: number, limit: number, offset: number): Promise<StudentNotes[]> {
   const rows = await
     db.select()
     .from(student_notes)
