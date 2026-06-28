@@ -32,8 +32,21 @@ export const student_notes = mysqlTable( "student_notes" , {
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 }) 
 
+export const refresh_tokens = mysqlTable("refresh_tokens", {
+  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
+  user_id: bigint("user_id", { mode: "number" }).notNull(),
+  // SHA-256(生トークン) を hex で。生トークンは保存しない。
+  token_hash: varchar("token_hash", { length: 64 }).notNull().unique(),
+  expires_at: timestamp("expires_at").notNull(),
+  // null = 有効 / 値あり = 失効済み（行は消さずに残す＝再利用検知のため）
+  revoked_at: timestamp("revoked_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // テーブル定義から行の型を導出（select 用 / insert 用）。
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type StudentNotes = typeof student_notes.$inferSelect;
 export type NewStudentNotes = typeof student_notes.$inferInsert;
+export type Refresh_token = typeof refresh_tokens.$inferSelect;
+export type NewRefresh_token = typeof refresh_tokens.$inferInsert;
