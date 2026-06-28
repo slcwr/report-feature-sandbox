@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { sign } from "hono/jwt";
 import * as usersRepository from "../repositories/users";
 import type { User } from "../db/schema";
+import { config } from "../config";
 
 // ─────────────────────────────────────────────
 // ビジネスロジック層（Service / auth）
@@ -23,7 +24,6 @@ export class AuthError extends Error {
   }
 }
 
-const JWT_SECRET = process.env.JWT_SECRET ?? "dev-secret-change-me";
 const TOKEN_TTL_SEC = 60 * 60 * 24 * 7; // 7日
 
 // API レスポンスで外に出してよいユーザー情報（password_hash は絶対に含めない）。
@@ -41,7 +41,7 @@ export function issueToken(userId: number): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   return sign(
     { sub: userId, iat: now, exp: now + TOKEN_TTL_SEC },
-    JWT_SECRET,
+    config.jwtSecret,
     "HS256",
   );
 }

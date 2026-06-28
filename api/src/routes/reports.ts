@@ -15,14 +15,14 @@ export const reports = new Hono()
   // 認証必須：以降のレポート系は Bearer トークンが検証できた時だけ通す。
   .use("/*", authMiddleware)
   // ① 学校別の完了率
-  .get("/completion-by-school", async (c) => {
+  .get("/completion-by-school", authMiddleware,async (c) => {
     return c.json(await reportsService.getCompletionBySchool());
   })
   // ② 動画別ランキング
-  .get("/video-ranking", async (c) => {
+  .get("/video-ranking", authMiddleware,async (c) => {
     return c.json(await reportsService.getVideoRanking());
   })
   // ③ 要注意の生徒（平均進捗が低い順）
-  .get("/at-risk-students", async (c) => {
+  .get("/at-risk-students", authMiddleware,async (c) => {
     return c.json(await reportsService.getAtRiskStudents());
   });

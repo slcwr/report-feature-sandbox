@@ -1,12 +1,12 @@
 import { createMiddleware } from "hono/factory";
 import { verify } from "hono/jwt";
+import { config } from "../config";
 
 // ─────────────────────────────────────────────
 // 横断的関心事（Middleware / 認証）
 // Authorization: Bearer <JWT> を検証し、通れば c.set("userId", ...) で後段に渡す。
 // 保護したいルートにだけ差し込んで使う（例：.get("/me", authMiddleware, ...)）。
 // ─────────────────────────────────────────────
-const JWT_SECRET = process.env.JWT_SECRET ?? "dev-secret-change-me";
 
 export const authMiddleware = createMiddleware<{
   Variables: { userId: number };
@@ -19,7 +19,7 @@ export const authMiddleware = createMiddleware<{
   }
 
   try {
-    const payload = await verify(token, JWT_SECRET, "HS256");
+    const payload = await verify(token, config.jwtSecret, "HS256");
     // sub に入れたユーザーIDを取り出して後段へ。
     c.set("userId", Number(payload.sub));
   } catch {

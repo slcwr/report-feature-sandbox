@@ -24,7 +24,7 @@ export const notes = new Hono()
   // ページネーションはクエリ文字列（?page=&limit=）。
   // validator で数値化＋デフォルト値を与えると、RPC クライアントの型にも query が生える。
   .get(
-    "/notes/:student_id",
+    "/notes/:student_id",authMiddleware,
     validator("query", (value) => ({
       page: Number(value.page ?? "1"),
       limit: Number(value.limit ?? "20"),
