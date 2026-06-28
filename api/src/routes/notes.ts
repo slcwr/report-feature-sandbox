@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { validator } from "hono/validator";
 import * as notesService from "../services/notes";
 import { authMiddleware } from "../middlewares/auth";
+import { authUsers } from "drizzle-orm/supabase";
 
 export const notes = new Hono()
   // 新規登録：認証必須。author_id は body ではなく JWT（ログインユーザー）から取る。
@@ -30,8 +31,9 @@ export const notes = new Hono()
       limit: Number(value.limit ?? "20"),
     })),
     async (c) => {
-      const id = Number(c.req.param("student_id"));
+      const studentId = Number(c.req.param("student_id"));
       const { page, limit } = c.req.valid("query");
-      return c.json(await notesService.getByStudentId(id, page, limit));
+      const userId = c.get("userId")
+      return c.json(await notesService.getByStudentId(studentId, page, limit, userId));
     },
   );
