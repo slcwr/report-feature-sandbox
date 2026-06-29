@@ -14,4 +14,6 @@ if (!JWT_SECRET) {
 export const config = {
   // 型は string（undefined ではない）。使う側での null チェックは不要。
   jwtSecret: JWT_SECRET,
+  // 本番のみ Secure 属性を付ける（ローカル http では付けると Cookie が送られないため）。
+  cookieSecure: process.env.NODE_ENV === "production",
 } as const;

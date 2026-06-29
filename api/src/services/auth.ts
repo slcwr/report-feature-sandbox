@@ -2,7 +2,9 @@ import bcrypt from "bcryptjs";
 import { sign } from "hono/jwt";
 import * as usersRepository from "../repositories/users";
 import type { User } from "../db/schema";
+import * as refreshTokenRepository from "../repositories/refresh_tokens";
 import { config } from "../config";
+import { createHash, randomBytes } from "node:crypto";
 
 // ─────────────────────────────────────────────
 // ビジネスロジック層（Service / auth）
@@ -24,7 +26,9 @@ export class AuthError extends Error {
   }
 }
 
-const TOKEN_TTL_SEC = 60 * 60 * 24 * 7; // 7日
+const TOKEN_TTL_SEC = 60 * 15; // アクセストークンは15分
+// Cookie の maxAge と合わせるため route 側でも使う。
+export const REFRESH_TTL_SEC = 60 * 60 * 24 * 30; // 30日
 
 // API レスポンスで外に出してよいユーザー情報（password_hash は絶対に含めない）。
 export type PublicUser = {
@@ -44,6 +48,55 @@ export function issueToken(userId: number): Promise<string> {
     config.jwtSecret,
     "HS256",
   );
+}
+
+function hashToken(raw: string): string {
+  return createHash("sha256").update(raw).digest("hex");
+}
+
+// 生トークンを発行＆DB保存。返すのは生トークン（DBにはハッシュのみ）。
+// created_at は defaultNow、revoked_at は null 既定なので渡さない。
+export async function issueRefreshToken(userId: number): Promise<string> {
+  const raw = randomBytes(32).toString("base64url");
+  const expiresAt = new Date(Date.now() + REFRESH_TTL_SEC * 1000);
+  await refreshTokenRepository.create({
+    user_id: userId,
+    token_hash: hashToken(raw),
+    expires_at: expiresAt,
+  });
+  return raw;
+}
+
+// リフレッシュ：検証 → ローテーション（古いものを失効し新規発行）→ 新アクセス＋新リフレッシュを返す。
+export async function rotateRefreshToken(
+  raw: string,
+): Promise<{ accessToken: string; refreshToken: string }> {
+  const row = await refreshTokenRepository.findByHash(hashToken(raw));
+  if (!row) {
+    throw new AuthError("セッションが無効です。再ログインしてください", 401);
+  }
+
+  // 再利用検知：失効済みの行が再提示された＝盗難の疑い。
+  // 安全側に倒し、そのユーザーの有効な全トークンを失効させる。
+  if (row.revoked_at) {
+    await refreshTokenRepository.revokeAllForUser(row.user_id);
+    throw new AuthError("セッションが無効です。再ログインしてください", 401);
+  }
+
+  if (row.expires_at < new Date()) {
+    throw new AuthError("セッションの有効期限が切れました。再ログインしてください", 401);
+  }
+
+  // ローテーション：古い行を失効させ、新しいトークンを発行する。
+  await refreshTokenRepository.revoke(row.id);
+  const accessToken = await issueToken(row.user_id);
+  const refreshToken = await issueRefreshToken(row.user_id);
+  return { accessToken, refreshToken };
+}
+
+// ログアウト：該当のリフレッシュトークンを失効させる（JWT 側は短命なので放置でよい）。
+export async function logout(raw: string): Promise<void> {
+  await refreshTokenRepository.revokeByHash(hashToken(raw));
 }
 
 // 入力の最低限のバリデーション（本番は zod 等に置き換える想定）。
@@ -86,7 +139,7 @@ export async function register(
 export async function login(
   email: string,
   password: string,
-): Promise<{ user: PublicUser; token: string }> {
+): Promise<{ user: PublicUser; accessToken: string; refreshToken: string }> {
   const user = await usersRepository.findByEmail(email);
   if (!user) {
     throw new AuthError("メールアドレスまたはパスワードが違います", 401);
@@ -97,6 +150,7 @@ export async function login(
     throw new AuthError("メールアドレスまたはパスワードが違います", 401);
   }
 
-  const token = await issueToken(user.id);
-  return { user: toPublicUser(user), token };
+  const accessToken = await issueToken(user.id);
+  const refreshToken = await issueRefreshToken(user.id)
+  return { user: toPublicUser(user), accessToken, refreshToken };
 }
