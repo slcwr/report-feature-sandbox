@@ -4,6 +4,7 @@
 // Hono RPC クライアントの生成と、3 本のレポート取得をまとめて担当する。
 // ─────────────────────────────────────────────
 import { hc } from "hono/client";
+import { UnauthorizedError } from "~/features/auth/errors";
 // api 側がエクスポートしている型だけを import（型なので実行時には消える）。
 // これにより client.api.reports[...] が型安全になり、URL の打ち間違いも防げる。
 import type { AppType } from "../../../../api/src/index";
@@ -22,10 +23,22 @@ const client = hc<AppType>(apiUrl);
 export async function getReports(token: string) {
   // 保護された API なので、session に保存しておいた JWT を Bearer で添える。
   const headers = { Authorization: `Bearer ${token}` };
+  const [completionRes, videoRes, atRiskRes] = await Promise.all([
+    client.api.reports["completion-by-school"].$get({}, { headers }),
+    client.api.reports["video-ranking"].$get({}, { headers }),
+    client.api.reports["at-risk-students"].$get({}, { headers }),
+  ]);
+
+  // どれか 1 つでもアクセス切れなら、withAuth に /refresh → リトライを任せる。
+  // 401 はミドルウェアが返すため RPC の型には現れない。number で比較する。
+  for (const res of [completionRes, videoRes, atRiskRes]) {
+    if ((res.status as number) === 401) throw new UnauthorizedError();
+  }
+
   const [completionBySchool, videoRanking, atRiskStudent] = await Promise.all([
-    client.api.reports["completion-by-school"].$get({}, { headers }).then((res) => res.json()),
-    client.api.reports["video-ranking"].$get({}, { headers }).then((res) => res.json()),
-    client.api.reports["at-risk-students"].$get({}, { headers }).then((res) => res.json()),
+    completionRes.json(),
+    videoRes.json(),
+    atRiskRes.json(),
   ]);
 
   return { completionBySchool, videoRanking, atRiskStudent };
